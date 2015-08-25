@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!-- Hive configuration to use a share instance of derby, this will need 
+	a instance of derby server running. Check the script resources/hive/scripts/ hive-derby-local.sh -->
+
+<configuration>
+	<property>
+		<name>mapreduce.jobtracker.address</name>
+		<value>local</value>
+		<description />
+	</property>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>file:///tmp/hive/fs</value>
+		<description />
+	</property>
+	<property>
+		<name>hive.metastore.uris</name>
+		<value>thrift://localhost:9083</value>
+		<description />
+	</property>
+	<property>
+		<name>hive.metastore.warehouse.dir</name>
+		<value>file:///tmp/hive/warehouse</value>
+		<description />
+	</property>
+	<property>
+		<name>javax.jdo.option.ConnectionDriverName</name>
+		<value>org.apache.derby.jdbc.ClientDriver</value>
+		<description />
+	</property>
+	<property>
+		<name>javax.jdo.option.ConnectionURL</name>
+		<value>jdbc:derby://localhost:1527/tmp/hive/metastore_db;create=true</value>
+		<description />
+	</property>
+</configuration>
