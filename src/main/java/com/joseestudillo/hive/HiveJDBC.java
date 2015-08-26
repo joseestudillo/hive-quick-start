@@ -12,7 +12,11 @@ import org.apache.log4j.Logger;
 
 /**
  * 
- * Example class to show how to use JDBC in hive
+ * Example class to show how to use JDBC in hive.
+ * 
+ * By Default it connects to a new local derby instance.
+ * 
+ * Notice that in the file hive-site.xml is in the class path its configuration will be loaded.
  * 
  * @author Jose Estudillo
  * 
@@ -21,7 +25,8 @@ public class HiveJDBC {
 
 	public static final Logger log = Logger.getLogger(HiveJDBC.class);
 	public static final String HIVE_DRIVER = "org.apache.hive.jdbc.HiveDriver";
-	//this connection string creates the local derby instance if required
+	//this connection string creates the local derby instance if required. 
+	//for this option the configuration will be loaded from hive-site.xml in the work space automatically
 	public static final String HIVE_LOCAL = "jdbc:hive2:///";
 	//this connection string required a running hiveserver2 server
 	public static final String HIVE_LOCAL_HIVESERVER2 = "jdbc:hive2://localhost:10000";
@@ -51,7 +56,7 @@ public class HiveJDBC {
 		}
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+	public static void run(String... args) throws Exception {
 		Class.forName(HIVE_DRIVER);
 
 		String connectionString = (args.length == 0) ? HIVE_LOCAL_HIVESERVER2 : args[0];
@@ -93,5 +98,9 @@ public class HiveJDBC {
 
 		connection.close();
 		System.exit(0);
+	}
+
+	public static void main(String[] args) throws Exception {
+		run((args.length == 0) ? HIVE_LOCAL : args[0]);
 	}
 }

@@ -1,5 +1,8 @@
 package com.joseestudillo.hive;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +29,9 @@ import org.apache.thrift.TException;
 
 /**
  * 
- * Example of connections the the Hive's Metastore from Java
+ * Example of connections the the Hive's Metastore from Java.
+ * 
+ * By Default it connects to a new local derby instance.
  * 
  * @author Jose Estudillo
  *
@@ -35,8 +40,8 @@ public class HiveMetastore {
 
 	private static final Logger log = Logger.getLogger(HiveMetastore.class);
 
-	private static final String HIVE_LOCAL_SHARED_DERBY_CONF = "/hive/conf/hive-site-shared-derby.xml";
-	private static final String HIVE_LOCAL_CONF = "/hive/conf/hive-site-local.xml";
+	public static final String HIVE_LOCAL_SHARED_DERBY_CONF = "/hive-site-shared-derby.xml";
+	public static final String HIVE_LOCAL_CONF = "/hive-site-local.xml";
 
 	/**
 	 * It creates a hive <code>Database</code> instance. The idea is to show how to create a database programmatically in the same way Hive console does.
@@ -141,10 +146,17 @@ public class HiveMetastore {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void run(String... args) throws Exception {
+
+		InputStream configInputStream;
+		if (args.length > 0) {
+			configInputStream = new FileInputStream(new File(args[0]));
+		} else {
+			configInputStream = HiveMetastore.class.getResourceAsStream(HIVE_LOCAL_CONF);
+		}
 
 		HiveConf hiveConf = new HiveConf();
-		hiveConf.addResource(HiveMetastore.class.getResourceAsStream(HIVE_LOCAL_SHARED_DERBY_CONF));
+		hiveConf.addResource(configInputStream);
 
 		Driver driver = new Driver(hiveConf);
 		HiveMetaStoreClient client = new HiveMetaStoreClient(hiveConf);
@@ -176,5 +188,9 @@ public class HiveMetastore {
 		log.info(String.format("-- %s", query));
 		response = driver.run(query);
 		log.info(String.format("Query Respose:", response));
+	}
+
+	public static void main(String[] args) throws Exception {
+		run((args.length == 0) ? HIVE_LOCAL_CONF : args[0]);
 	}
 }

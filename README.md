@@ -1,8 +1,13 @@
 # Hive
 
+
 ## Concepts:
 
 - _database_ or _schema_: defines a group of tables
+- Tables:
+  - External: Hive doesn't store the information and uses the original file to do the queries.
+  - Regular: Hive stores the content of the file in a more efficient way.
+
 
 ## Installing
 
@@ -10,13 +15,14 @@
 - extract the content of the latest release into it. At the time of this writing `apache-hive-1.2.1-bin`
 - create a symb link: `ln -sf apache-hive-1.2.1-bin/ current`
 - create the environment variables:
+
 ```bash
 #Hive
 export HIVE_HOME=/usr/local/apache/hive/current
 export PATH=$PATH:$HIVE_HOME/bin
 ```
 
-This should be enough for a development instance, but in some cases we will want to run the hive CLI, the metastore or even the hiveserver2 at the same time, to be able to do this we will need a database that actually keeps the information. To avoid installing a database in the host, we will use a Derby database Server. This will require some extra configuration
+This should be enough for a development instance, but in some cases we will want to run the hive CLI, the metastore or even the hiveserver2 at the same time, to be able to do this we will need a database that actually keeps the information. To avoid installing a database in the host, we will use a Derby database Server. This will require some extra configuration:
 
 ```bash
  #Derby
@@ -31,6 +37,15 @@ export HIVE_AUX_JARS_PATH=$DERBY_HOME/lib
 ```
 
 Besides this configuration an additional file is required, `$HIVE_HOME/conf/jdo.properties` which is included in the project.
+
+
+### Installing Derby
+
+- create the folder `/user/local/apache/derby/`
+- extract the content of the latest release into it. At the time of this writing `db-derby-10.11.1.1-bin`
+- create a symb link: `ln -sf db-derby-10.11.1.1-bin/ current`
+- create the environment variables as stated in the script above.
+
 
 ## Launching hive
 
@@ -48,19 +63,21 @@ In the folder `resources/hive/scripts` there are several Scripts that make easie
 - `hive-derby-local.sh`: launches a derby server to be shared across different hive applications.
 - `beeline-local.sh`: launch the beeline CLI.
 - `hive-local.sh`: launch the hive CLI.
-- `hive-metastore-server-local.sh`: lauches the hive metastore.
+- `hive-metastore-server-local.sh`: launches the hive metastore.
 - `hiveserver2-local.sh`: launches the hiveserver2. 
+
 
 ## Code examples
 
 - `com.joseestudillo.hive`:
-  - `HiveJDBC`: Using JDBC againts Hive.
+  - `HiveJDBC`: Using JDBC with Hive.
   - `HiveMetastore`: Connecting the to the Hive metastore from Java.
 - `com.joseestudillo.hive.serde`: SerDe examples.
-- `com.joseestudillo.hive.udf`: Udf examples, there are also examples about how to unit test UDFs.
+- `com.joseestudillo.hive.udf`: UDF examples, there are also examples about how to unit test UDFs.
 
 - `resources/hql`: contains examples of HQL scripts, showing how to do different operations from the Hive CLI. All this scripts can be run using `hive-local.sh -f SCRIPT_NAME.hql`, notice that some of then will require the jar file generated (`install-serde.sh` will do the job).
 
+
 ## TODOs
-- Create your own Type and ObjectInspector
-- How to use/query union types
+- Create custom Type and ObjectInspector
+- Example of how to use/query union types
