@@ -8,6 +8,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 
@@ -31,6 +32,9 @@ public class HiveJDBC {
 	public static final String HIVE_LOCAL = "jdbc:hive2:///";
 	//this connection string required a running hiveserver2 server
 	public static final String HIVE_LOCAL_HIVESERVER2 = "jdbc:hive2://localhost:10000";
+
+	private static final String HADOOP_AUTH_PROP = "hadoop.security.authentication";
+	private static final String HADOOP_AUTH_VAL_KERBEROS = "kerberos";
 
 	private static void logResultSet(ResultSet rs) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -58,39 +62,23 @@ public class HiveJDBC {
 	}
 
 	public static void run(String... args) throws Exception {
-		
-		String principal = "hive/sandbox.hortonworks.com@HORTONWORKS.COM";
-		String keytabPath = "/tmp/full-keytab.keytab";
-		
-		org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
-	    conf.set("hadoop.security.authentication", "Kerberos");
-	    UserGroupInformation.setConfiguration(conf);
-	    UserGroupInformation.loginUserFromKeytab(principal, keytabPath);
-	    
-		/*
-		conf.set("yarn.timeline-service.http-authentication.kerberos.keytab", "/etc/security/keytabs/spnego.service.keytab");
-		conf.set("yarn.timeline-service.http-authentication.kerberos.principal", "HTTP/_HOST@HORTONWORKS.COM");
-		conf.set("hadoop.http.authentication.kerberos.keytab", "${user.home}/hadoop.keytab");
-		conf.set("nfs.kerberos.principal", "nfs/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("dfs.web.authentication.kerberos.keytab", "/etc/security/keytabs/spnego.service.keytab");
-		conf.set("dfs.datanode.kerberos.principal", "dn/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("hadoop.kerberos.kinit.command", "kinit");
-		conf.set("yarn.timeline-service.http-authentication.type", "kerberos");
-		conf.set("dfs.namenode.kerberos.principal", "nn/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("hadoop.security.authentication", "kerberos");
-		conf.set("dfs.secondary.namenode.kerberos.internal.spnego.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("dfs.secondary.namenode.kerberos.principal", "nn/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("dfs.web.authentication.kerberos.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COM");
-		conf.set("dfs.namenode.kerberos.internal.spnego.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COMc");
-		conf.set("hadoop.http.authentication.kerberos.principal", "HTTP/_HOST@LOCALHOST");
-		*/
-		
-		
-		Class.forName(HIVE_DRIVER);
 
 		String connectionString = (args.length == 0) ? HIVE_LOCAL_HIVESERVER2 : args[0];
+		String principal = (args.length > 1) ? args[1] : "";
+		String keytabPath = (args.length > 2) ? args[2] : "";
 
-		log.info(String.format("Using: %s", connectionString));
+		if (!principal.isEmpty() && !keytabPath.isEmpty()) {
+			log.info("Configuring kerberos access...");
+			Configuration conf = new Configuration();
+			conf.set(HADOOP_AUTH_PROP, HADOOP_AUTH_VAL_KERBEROS);
+			UserGroupInformation.setConfiguration(conf);
+			UserGroupInformation.loginUserFromKeytab(principal, keytabPath);
+			log.info(String.format("Keberos access configured. {principal: %s, keytab_file: %s}", principal, keytabPath));
+		}
+
+		Class.forName(HIVE_DRIVER);
+
+		log.info(String.format("Using JDBC: %s", connectionString));
 
 		Connection connection = DriverManager.getConnection(connectionString, "", "");
 		String query;
@@ -130,6 +118,6 @@ public class HiveJDBC {
 	}
 
 	public static void main(String[] args) throws Exception {
-		run((args.length == 0) ? HIVE_LOCAL : args[0]);
+		run((args.length == 0) ? new String[] { HIVE_LOCAL } : args);
 	}
 }

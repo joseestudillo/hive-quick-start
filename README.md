@@ -17,7 +17,7 @@
 - create the environment variables:
 
 ```bash
-#Hive
+ #Hive
 export HIVE_HOME=/usr/local/apache/hive/current
 export PATH=$PATH:$HIVE_HOME/bin
 ```
@@ -70,7 +70,7 @@ In the folder `resources/hive/scripts` there are several Scripts that make easie
 ## Code examples
 
 - `com.joseestudillo.hive`:
-  - `HiveJDBC`: Using JDBC with Hive.
+  - `HiveJDBC`: Using JDBC with Hive. It also allows to access to Kerberized instances (the script `hive-kerberos-jdbc.sh` is an example of use).
   - `HiveMetastore`: Connecting the to the Hive metastore from Java.
 - `com.joseestudillo.hive.serde`: SerDe examples.
 - `com.joseestudillo.hive.udf`: UDF examples, there are also examples about how to unit test UDFs.
