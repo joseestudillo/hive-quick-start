@@ -8,6 +8,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 
 /**
@@ -57,6 +58,34 @@ public class HiveJDBC {
 	}
 
 	public static void run(String... args) throws Exception {
+		
+		String principal = "hive/sandbox.hortonworks.com@HORTONWORKS.COM";
+		String keytabPath = "/tmp/full-keytab.keytab";
+		
+		org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
+	    conf.set("hadoop.security.authentication", "Kerberos");
+	    UserGroupInformation.setConfiguration(conf);
+	    UserGroupInformation.loginUserFromKeytab(principal, keytabPath);
+	    
+		/*
+		conf.set("yarn.timeline-service.http-authentication.kerberos.keytab", "/etc/security/keytabs/spnego.service.keytab");
+		conf.set("yarn.timeline-service.http-authentication.kerberos.principal", "HTTP/_HOST@HORTONWORKS.COM");
+		conf.set("hadoop.http.authentication.kerberos.keytab", "${user.home}/hadoop.keytab");
+		conf.set("nfs.kerberos.principal", "nfs/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("dfs.web.authentication.kerberos.keytab", "/etc/security/keytabs/spnego.service.keytab");
+		conf.set("dfs.datanode.kerberos.principal", "dn/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("hadoop.kerberos.kinit.command", "kinit");
+		conf.set("yarn.timeline-service.http-authentication.type", "kerberos");
+		conf.set("dfs.namenode.kerberos.principal", "nn/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("hadoop.security.authentication", "kerberos");
+		conf.set("dfs.secondary.namenode.kerberos.internal.spnego.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("dfs.secondary.namenode.kerberos.principal", "nn/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("dfs.web.authentication.kerberos.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COM");
+		conf.set("dfs.namenode.kerberos.internal.spnego.principal", "HTTP/sandbox.hortonworks.com@HORTONWORKS.COMc");
+		conf.set("hadoop.http.authentication.kerberos.principal", "HTTP/_HOST@LOCALHOST");
+		*/
+		
+		
 		Class.forName(HIVE_DRIVER);
 
 		String connectionString = (args.length == 0) ? HIVE_LOCAL_HIVESERVER2 : args[0];
